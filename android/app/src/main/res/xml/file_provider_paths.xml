@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- App-private files dir, used for temp video-only / audio-only downloads. -->
+    <files-path name="grabix_temp" path="grabix/" />
+    <cache-path name="grabix_cache" path="grabix/" />
+    <!-- Public Movies dir where finished MP4s land on Android <= 9. -->
+    <external-path name="grabix_movies" path="Movies/GrabixPro/" />
+</paths>

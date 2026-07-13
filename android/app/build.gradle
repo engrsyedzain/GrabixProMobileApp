@@ -85,6 +85,31 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    // Generate a separate APK per ABI. youtubedl-android bundles a full Python +
+    // ffmpeg per architecture, so a universal APK carries every ABI's copy. With
+    // splits each device gets only its own ABI, roughly halving the download.
+    // Build all splits with `./gradlew assembleRelease`; each lands in
+    // app/build/outputs/apk/release/ as app-<abi>-release.apk.
+    splits {
+        abi {
+            enable true
+            reset()
+            include "arm64-v8a", "armeabi-v7a"
+            // No universal (all-ABI) APK — that's the fat one we're avoiding.
+            // Flip to true if you need a single install-anywhere fallback.
+            universalApk false
+        }
+    }
+
+    // youtubedl-android EXECUTES its bundled .so binaries at runtime, so they
+    // must be extracted to disk (uncompressed), not run from inside the APK.
+    // This pairs with android:extractNativeLibs="true" in the manifest.
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -107,9 +132,32 @@ android {
     }
 }
 
+// Give each ABI split a distinct versionCode so devices update correctly (and
+// Play would accept them). Convention: higher codes for newer/64-bit ABIs.
+def abiVersionCodes = ["armeabi-v7a": 1, "arm64-v8a": 2]
+android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        def abi = output.getFilter(com.android.build.OutputFile.ABI)
+        if (abi != null) {
+            output.versionCodeOverride =
+                abiVersionCodes.get(abi) * 1000 + variant.versionCode
+        }
+    }
+}
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+
+    // On-device extraction + download engine: a yt-dlp wrapper that bundles
+    // Python 3.8. The ffmpeg artifact is required to merge adaptive
+    // (video-only + audio-only) formats into one file. Supports YouTube AND
+    // Facebook (and hundreds more) with in-app updatable extractor rules.
+    implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
+    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
+
+    // Durable background downloads that survive the app being killed.
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
