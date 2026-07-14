@@ -1,6 +1,13 @@
-import {Monitor, Smartphone} from 'lucide-react';
+import {Monitor, Smartphone, Mail, MessageCircle} from 'lucide-react';
 import Logo from '../components/Logo';
-import {WINDOWS_URL, ANDROID_URL} from '../data';
+import {
+  WINDOWS_URL,
+  ANDROID_URL,
+  CONTACT_EMAIL,
+  CONTACT_WHATSAPP,
+  MAILTO_URL,
+  WHATSAPP_URL,
+} from '../data';
 
 export default function Footer() {
   return (
@@ -29,23 +36,54 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <a
-              href={WINDOWS_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="btn-ghost px-5 py-3 text-sm">
-              <Monitor size={18} />
-              Windows App
-            </a>
-            <a
-              href={ANDROID_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="btn-ghost px-5 py-3 text-sm">
-              <Smartphone size={18} />
-              Android APK
-            </a>
+          <div className="flex flex-col gap-8 sm:flex-row md:flex-col md:items-end">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <a
+                href={WINDOWS_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-ghost px-5 py-3 text-sm">
+                <Monitor size={18} />
+                Windows App
+              </a>
+              <a
+                href={ANDROID_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-ghost px-5 py-3 text-sm">
+                <Smartphone size={18} />
+                Android APK
+              </a>
+            </div>
+
+            {/* Contact */}
+            <div className="md:text-right">
+              <h3 className="text-[11px] font-bold uppercase tracking-widest text-haze">
+                Get in touch
+              </h3>
+              <div className="mt-3 flex flex-col gap-2">
+                <a
+                  href={MAILTO_URL}
+                  className="group inline-flex items-center gap-2.5 text-sm text-mist transition-colors hover:text-blue md:justify-end">
+                  <Mail
+                    size={16}
+                    className="text-blue transition-transform group-hover:scale-110"
+                  />
+                  {CONTACT_EMAIL}
+                </a>
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-2.5 text-sm text-mist transition-colors hover:text-cyan md:justify-end">
+                  <MessageCircle
+                    size={16}
+                    className="text-cyan transition-transform group-hover:scale-110"
+                  />
+                  {CONTACT_WHATSAPP}
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 

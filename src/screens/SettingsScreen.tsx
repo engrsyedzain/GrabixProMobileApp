@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {
+  Linking,
   PermissionsAndroid,
   Platform,
   Pressable,
@@ -16,6 +17,8 @@ import {
   Check,
   Info,
   ListVideo,
+  Mail,
+  MessageCircle,
   RefreshCw,
   Settings2,
   Share2,
@@ -35,6 +38,29 @@ const QUALITY_OPTIONS: {value: DefaultQuality; label: string}[] = [
   {value: '480', label: '480p'},
   {value: 'mp3', label: 'MP3'},
 ];
+
+const CONTACT_EMAIL = 'engr.syedzain@gmail.com';
+const CONTACT_WHATSAPP = '+92 300 2652848';
+// wa.me needs digits only — no '+', spaces or dashes.
+const WHATSAPP_URL = `https://wa.me/${CONTACT_WHATSAPP.replace(/\D/g, '')}`;
+const MAILTO_URL = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+  'Grabix Pro — Support',
+)}`;
+
+/** Opens a URL, telling the user plainly if no app can handle it. */
+async function openExternal(url: string, fallbackNote: string) {
+  try {
+    await Linking.openURL(url);
+  } catch {
+    ToastAndroid.show(fallbackNote, ToastAndroid.LONG);
+  }
+}
+
+const openEmail = () =>
+  openExternal(MAILTO_URL, `No email app found. Write to ${CONTACT_EMAIL}`);
+
+const openWhatsApp = () =>
+  openExternal(WHATSAPP_URL, `WhatsApp not installed. Message ${CONTACT_WHATSAPP}`);
 
 export default function SettingsScreen() {
   const [notifOk, setNotifOk] = useState(true);
@@ -211,6 +237,37 @@ export default function SettingsScreen() {
             directly on the Grab tab.
           </Text>
         </View>
+      </Card>
+
+      <Text style={styles.section}>Contact</Text>
+      <Card>
+        <Pressable
+          style={styles.row}
+          android_ripple={{color: colors.surfaceAlt}}
+          onPress={openEmail}>
+          <View style={styles.iconTile}>
+            <Mail size={20} color={colors.primary} />
+          </View>
+          <View style={{flex: 1, marginLeft: 14}}>
+            <Text style={styles.rowLabel}>Email the developer</Text>
+            <Text style={styles.rowDesc}>{CONTACT_EMAIL}</Text>
+          </View>
+        </Pressable>
+
+        <View style={styles.divider} />
+
+        <Pressable
+          style={styles.row}
+          android_ripple={{color: colors.surfaceAlt}}
+          onPress={openWhatsApp}>
+          <View style={[styles.iconTile, {backgroundColor: 'rgba(52,211,153,0.12)'}]}>
+            <MessageCircle size={20} color={colors.success} />
+          </View>
+          <View style={{flex: 1, marginLeft: 14}}>
+            <Text style={styles.rowLabel}>WhatsApp</Text>
+            <Text style={styles.rowDesc}>{CONTACT_WHATSAPP}</Text>
+          </View>
+        </Pressable>
       </Card>
 
       <Text style={styles.section}>About</Text>

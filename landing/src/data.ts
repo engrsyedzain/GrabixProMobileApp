@@ -1,8 +1,17 @@
 // Official download links (provided).
 export const WINDOWS_URL =
-  'https://www.dropbox.com/scl/fo/ohjjm7cwhfajad2sodrp1/ANs8_caym4PYDP30k-S_g2U?rlkey=sdzi2ov7kpz7zsbfd42azs0br&st=l4w6ax7k&dl=0';
+  'https://archive.org/download/grabix-pro-0.1.1-x-64-setup/GrabixPro_0.1.1_x64-setup.exe';
 export const ANDROID_URL =
-  'https://www.dropbox.com/scl/fo/u9dxi4kze5duvkqjd0xgh/ADA4PtY9xZpiTwq3lrLvtmI?rlkey=ysjqx8ttji4h6dqtyfit79iag&st=w4tz6en0&dl=0';
+  'https://archive.org/download/grabix-pro-arm-64-v-8a/GrabixPro-arm64-v8a.apk';
+
+// Developer contact.
+export const CONTACT_EMAIL = 'engr.syedzain@gmail.com';
+export const CONTACT_WHATSAPP = '+92 300 2652848';
+// wa.me expects digits only — no '+', spaces or dashes.
+export const WHATSAPP_URL = `https://wa.me/${CONTACT_WHATSAPP.replace(/\D/g, '')}`;
+export const MAILTO_URL = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+  'Grabix Pro — Support',
+)}`;
 
 // Platforms Grabix Pro supports (from the browser-extension manifest).
 export const PLATFORMS = [
@@ -18,7 +27,7 @@ export const PLATFORMS = [
 ];
 
 // The workflow: Share/paste a link → Format → Trim → Download.
-export const WORKFLOW: {n: string; title: string; body: string}[] = [
+export const WORKFLOW: { n: string; title: string; body: string }[] = [
   {
     n: '01',
     title: 'Share or paste a link',
@@ -42,23 +51,24 @@ export const WORKFLOW: {n: string; title: string; body: string}[] = [
 ];
 
 // Chrome extension side-load steps.
-export const EXTENSION_STEPS: {title: string; body: string; note?: string}[] = [
-  {
-    title: 'Locate the extension',
-    body: 'The extension files ship inside your Grabix Pro desktop installation — look for the "extension" folder in the app directory.',
-    note: 'e.g. C:\\Program Files\\Grabix Pro\\extension',
-  },
-  {
-    title: 'Enable Developer Mode',
-    body: 'Open Google Chrome, go to the Extensions page, and switch on Developer mode using the toggle in the top-right corner.',
-    note: 'chrome://extensions/',
-  },
-  {
-    title: 'Load unpacked',
-    body: 'Click "Load unpacked", then browse to the Grabix Pro directory and select the extension folder to install it.',
-  },
-  {
-    title: 'It pairs automatically',
-    body: 'Once installed, the extension connects to the running desktop app over native messaging. A Download button appears on supported video pages and hands each grab to Grabix Pro.',
-  },
-];
+export const EXTENSION_STEPS: { title: string; body: string; note?: string }[] =
+  [
+    {
+      title: 'Locate the extension',
+      body: 'The extension files ship inside your Grabix Pro desktop installation — look for the "extension" folder in the app directory.',
+      note: 'e.g. C:\\Program Files\\Grabix Pro\\extension',
+    },
+    {
+      title: 'Enable Developer Mode',
+      body: 'Open Google Chrome, go to the Extensions page, and switch on Developer mode using the toggle in the top-right corner.',
+      note: 'chrome://extensions/',
+    },
+    {
+      title: 'Load unpacked',
+      body: 'Click "Load unpacked", then browse to the Grabix Pro directory and select the extension folder to install it.',
+    },
+    {
+      title: 'It pairs automatically',
+      body: 'Once installed, the extension connects to the running desktop app over native messaging. A Download button appears on supported video pages and hands each grab to Grabix Pro.',
+    },
+  ];
