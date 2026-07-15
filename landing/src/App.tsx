@@ -6,6 +6,7 @@ import HowItWorks from './sections/HowItWorks';
 import Downloads from './sections/Downloads';
 import Extension from './sections/Extension';
 import Footer from './sections/Footer';
+import {Analytics} from '@vercel/analytics/react';
 
 export default function App() {
   return (
@@ -20,6 +21,8 @@ export default function App() {
         <Extension />
       </main>
       <Footer />
+      {/* Privacy-friendly page/visitor metrics; only reports once deployed to Vercel. */}
+      <Analytics />
     </div>
   );
 }
