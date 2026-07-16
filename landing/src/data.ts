@@ -50,25 +50,53 @@ export const WORKFLOW: { n: string; title: string; body: string }[] = [
   },
 ];
 
-// Chrome extension side-load steps.
-export const EXTENSION_STEPS: { title: string; body: string; note?: string }[] =
-  [
-    {
-      title: 'Locate the extension',
-      body: 'The extension files ship inside your Grabix Pro desktop installation — look for the "extension" folder in the app directory.',
-      note: 'e.g. C:\\Program Files\\Grabix Pro\\extension',
-    },
-    {
-      title: 'Enable Developer Mode',
-      body: 'Open Google Chrome, go to the Extensions page, and switch on Developer mode using the toggle in the top-right corner.',
-      note: 'chrome://extensions/',
-    },
-    {
-      title: 'Load unpacked',
-      body: 'Click "Load unpacked", then browse to the Grabix Pro directory and select the extension folder to install it.',
-    },
-    {
-      title: 'It pairs automatically',
-      body: 'Once installed, the extension connects to the running desktop app over native messaging. A Download button appears on supported video pages and hands each grab to Grabix Pro.',
-    },
-  ];
+export type ExtensionStep = { title: string; body: string; note?: string };
+
+// The install folder the desktop app creates. Per-user, not Program Files: the app
+// rewrites its native-messaging manifest into this folder on every launch, which a
+// machine-wide install would deny to a standard user.
+export const EXTENSION_DIR = '%LOCALAPPDATA%\\Programs\\Grabix Pro\\extension';
+
+// Firefox: a Mozilla-signed .xpi ships with the installer, so it installs
+// permanently from about:addons and needs no ID — the app already authorises this
+// add-on by its fixed ID.
+export const FIREFOX_STEPS: ExtensionStep[] = [
+  {
+    title: 'Open the Add-ons page',
+    body: 'In Firefox, open the Add-ons page, click the gear icon near the top right, and choose "Install Add-on From File".',
+    note: 'about:addons',
+  },
+  {
+    title: 'Pick the signed add-on',
+    body: 'Select grabix-pro-firefox.xpi from the extension folder inside your Grabix Pro installation, then confirm when Firefox asks.',
+    note: `${EXTENSION_DIR}\\grabix-pro-firefox.xpi`,
+  },
+  {
+    title: 'That’s it',
+    body: 'The add-on is signed by Mozilla, so it stays installed and pairs with the desktop app on its own. A Download button appears on supported video pages.',
+  },
+];
+
+// Chrome: loaded unpacked, and it genuinely needs the ID registered — Chrome will
+// only talk to a native host that names the exact extension ID, and that ID is
+// generated at load time.
+export const CHROME_STEPS: ExtensionStep[] = [
+  {
+    title: 'Enable Developer mode',
+    body: 'Open the Extensions page in Chrome, Edge or Brave, and switch on Developer mode using the toggle in the top-right corner.',
+    note: 'chrome://extensions',
+  },
+  {
+    title: 'Load unpacked',
+    body: 'Click "Load unpacked", then select the extension folder inside your Grabix Pro installation.',
+    note: EXTENSION_DIR,
+  },
+  {
+    title: 'Register the host',
+    body: 'Copy the Extension ID from the new extension’s card, paste it into Grabix Pro → Settings → Browser Extension, and click Register Host. Chrome only permits the connection once the app knows this ID.',
+  },
+  {
+    title: 'Ready',
+    body: 'The popup reads “Connected”, and a Download button appears on supported video pages — each grab is handed to Grabix Pro.',
+  },
+];
