@@ -4,6 +4,12 @@ export const WINDOWS_URL =
 export const ANDROID_URL =
   'https://archive.org/download/grabix-pro-arm-64-v-8a/GrabixPro-arm64-v8a.apk';
 
+// Public source repositories — Grabix Pro is fully open-source.
+export const GITHUB_MOBILE_URL =
+  'https://github.com/engrsyedzain/GrabixProMobileApp';
+export const GITHUB_DESKTOP_URL =
+  'https://github.com/engrsyedzain/Grabix-Pro-Desktop';
+
 // Developer contact.
 export const CONTACT_EMAIL = 'engr.syedzain@gmail.com';
 export const CONTACT_WHATSAPP = '+92 300 2652848';
@@ -52,10 +58,8 @@ export const WORKFLOW: { n: string; title: string; body: string }[] = [
 
 export type ExtensionStep = { title: string; body: string; note?: string };
 
-// The install folder the desktop app creates. Per-user, not Program Files: the app
-// rewrites its native-messaging manifest into this folder on every launch, which a
-// machine-wide install would deny to a standard user.
-export const EXTENSION_DIR = '%LOCALAPPDATA%\\Programs\\Grabix Pro\\extension';
+// The install folder the desktop app creates, under Program Files.
+export const EXTENSION_DIR = 'C:\\Program Files\\Grabix Pro\\extension';
 
 // Firefox: a Mozilla-signed .xpi ships with the installer, so it installs
 // permanently from about:addons and needs no ID — the app already authorises this

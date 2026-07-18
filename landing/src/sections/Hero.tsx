@@ -1,5 +1,11 @@
-import {Monitor, Smartphone, ShieldCheck} from 'lucide-react';
+import {Monitor, Smartphone, ShieldCheck, Code2, Ban, EyeOff} from 'lucide-react';
 import {WINDOWS_URL, ANDROID_URL} from '../data';
+
+const HERO_BADGES = [
+  {icon: Code2, label: '100% open source'},
+  {icon: Ban, label: 'No ads, ever'},
+  {icon: EyeOff, label: 'Nothing tracks you'},
+];
 
 export default function Hero() {
   return (
@@ -43,7 +49,18 @@ export default function Hero() {
             </a>
           </div>
 
-          <div className="mt-6 flex items-center gap-2 text-sm text-haze">
+          <div className="mt-6 flex flex-wrap gap-2.5">
+            {HERO_BADGES.map(({icon: Icon, label}) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ink-700/70 px-3 py-1.5 text-xs font-semibold text-frost backdrop-blur-sm">
+                <Icon size={14} className="text-blue" />
+                {label}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-5 flex items-center gap-2 text-sm text-haze">
             <ShieldCheck size={16} className="text-blue" />
             Free &middot; No watermark &middot; No sign-in &middot; Direct from
             source

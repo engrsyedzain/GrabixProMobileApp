@@ -2,6 +2,7 @@ import Nav from './sections/Nav';
 import Hero from './sections/Hero';
 import Platforms from './sections/Platforms';
 import Features from './sections/Features';
+import OpenSource from './sections/OpenSource';
 import HowItWorks from './sections/HowItWorks';
 import Downloads from './sections/Downloads';
 import Extension from './sections/Extension';
@@ -16,6 +17,7 @@ export default function App() {
         <Hero />
         <Platforms />
         <Features />
+        <OpenSource />
         <HowItWorks />
         <Downloads />
         <Extension />
