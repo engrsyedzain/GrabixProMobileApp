@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -8,11 +8,11 @@ import {
   Text,
   View,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {Bell, Check, RefreshCw, TriangleAlert, Zap} from 'lucide-react-native';
-import {Ytdl} from './native';
-import {colors} from './theme';
-import {Button} from './ui';
+import { Ytdl } from './native';
+import { colors } from './theme';
+import { Button } from './ui';
 
 type StepState = 'pending' | 'running' | 'done' | 'failed';
 
@@ -32,14 +32,27 @@ export default function FirstRunSetup() {
   const [finished, setFinished] = useState(false);
 
   const run = useCallback(async () => {
-    // 1 — notifications (Android 13+ requires an explicit grant).
+    // Kick the engine update off immediately (this also unpacks Python on a
+    // fresh install), in parallel with the notification prompt — so it never
+    // sits waiting behind the permission dialog.
+    setUpdate('running');
+    const updating = Ytdl.update('STABLE')
+      .then(res => {
+        setVersion(res.version);
+        setUpdate('done');
+      })
+      .catch(() => setUpdate('failed'));
+
+    // Notifications (Android 13+ requires an explicit grant).
     setNotif('running');
     try {
       if (Platform.OS === 'android' && Number(Platform.Version) >= 33) {
         const res = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
         );
-        setNotif(res === PermissionsAndroid.RESULTS.GRANTED ? 'done' : 'failed');
+        setNotif(
+          res === PermissionsAndroid.RESULTS.GRANTED ? 'done' : 'failed',
+        );
       } else {
         setNotif('done'); // granted at install time below API 33
       }
@@ -47,16 +60,7 @@ export default function FirstRunSetup() {
       setNotif('failed');
     }
 
-    // 2 — update the yt-dlp engine (also unpacks Python on a fresh install).
-    setUpdate('running');
-    try {
-      const res = await Ytdl.update('STABLE');
-      setVersion(res.version);
-      setUpdate('done');
-    } catch {
-      setUpdate('failed');
-    }
-
+    await updating;
     await Ytdl.completeFirstRun().catch(() => {});
     setFinished(true);
   }, []);
@@ -67,6 +71,14 @@ export default function FirstRunSetup() {
         if (first) {
           setVisible(true);
           run();
+        } else {
+          // Safety-net: if a previous first run couldn't finish the engine
+          // update (e.g. no network on first launch), quietly retry now.
+          Ytdl.isEngineUpdated()
+            .then(ok => {
+              if (!ok) Ytdl.update('STABLE').catch(() => {});
+            })
+            .catch(() => {});
         }
       })
       .catch(() => {});
@@ -75,7 +87,12 @@ export default function FirstRunSetup() {
   if (!visible) return null;
 
   return (
-    <Modal visible transparent={false} animationType="fade" statusBarTranslucent>
+    <Modal
+      visible
+      transparent={false}
+      animationType="fade"
+      statusBarTranslucent
+    >
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
         <View style={styles.logo}>
           <Zap size={30} color={colors.primary} strokeWidth={2.4} />
@@ -136,16 +153,22 @@ function Step({
   return (
     <View style={styles.step}>
       <View style={styles.stepIcon}>{icon}</View>
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         <Text style={styles.stepTitle}>{title}</Text>
-        <Text style={styles.stepBody}>{state === 'failed' ? failBody : body}</Text>
+        <Text style={styles.stepBody}>
+          {state === 'failed' ? failBody : body}
+        </Text>
       </View>
       <View style={styles.stepState}>
         {state === 'running' && (
           <ActivityIndicator size="small" color={colors.primary} />
         )}
-        {state === 'done' && <Check size={20} color={colors.success} strokeWidth={3} />}
-        {state === 'failed' && <TriangleAlert size={20} color={colors.warning} />}
+        {state === 'done' && (
+          <Check size={20} color={colors.success} strokeWidth={3} />
+        )}
+        {state === 'failed' && (
+          <TriangleAlert size={20} color={colors.warning} />
+        )}
       </View>
     </View>
   );
@@ -176,8 +199,8 @@ const styles = StyleSheet.create({
     marginTop: 22,
     letterSpacing: -0.3,
   },
-  sub: {color: colors.textDim, fontSize: 14, marginTop: 8, lineHeight: 20},
-  steps: {marginTop: 34, gap: 12},
+  sub: { color: colors.textDim, fontSize: 14, marginTop: 8, lineHeight: 20 },
+  steps: { marginTop: 34, gap: 12 },
   step: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -196,9 +219,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 14,
   },
-  stepTitle: {color: colors.text, fontSize: 15, fontWeight: '700'},
-  stepBody: {color: colors.textDim, fontSize: 12, marginTop: 3, lineHeight: 17},
-  stepState: {width: 28, alignItems: 'center', marginLeft: 8},
-  footer: {marginTop: 'auto'},
-  wait: {color: colors.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 14},
+  stepTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
+  stepBody: {
+    color: colors.textDim,
+    fontSize: 12,
+    marginTop: 3,
+    lineHeight: 17,
+  },
+  stepState: { width: 28, alignItems: 'center', marginLeft: 8 },
+  footer: { marginTop: 'auto' },
+  wait: {
+    color: colors.textFaint,
+    fontSize: 13,
+    textAlign: 'center',
+    paddingVertical: 14,
+  },
 });

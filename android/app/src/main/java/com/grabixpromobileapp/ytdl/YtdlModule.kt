@@ -143,6 +143,9 @@ class YtdlModule(private val reactContext: ReactApplicationContext) :
                     else -> YoutubeDL.UpdateChannel._STABLE
                 }
                 val status = YoutubeDL.getInstance().updateYoutubeDL(reactContext, ch)
+                // Mark the engine as successfully brought up to date so the
+                // startup safety-net stops retrying.
+                prefs().edit().putBoolean(KEY_ENGINE_UPDATED, true).apply()
                 promise.resolve(
                     Arguments.createMap().apply {
                         putString("status", status?.name ?: "UNKNOWN")
@@ -153,6 +156,12 @@ class YtdlModule(private val reactContext: ReactApplicationContext) :
                 promise.reject("E_UPDATE_FAILED", t.message ?: "yt-dlp update failed", t)
             }
         }
+    }
+
+    /** True once a yt-dlp update has completed at least once (else retry on launch). */
+    @ReactMethod
+    fun isEngineUpdated(promise: Promise) {
+        promise.resolve(prefs().getBoolean(KEY_ENGINE_UPDATED, false))
     }
 
     /** Current on-device yt-dlp version name (null before first init/update). */
@@ -166,6 +175,16 @@ class YtdlModule(private val reactContext: ReactApplicationContext) :
                 promise.resolve(null)
             }
         }
+    }
+
+    /** This app's own version name, straight from the package manifest. */
+    @ReactMethod
+    fun getAppVersion(promise: Promise) {
+        val v = runCatching {
+            reactContext.packageManager
+                .getPackageInfo(reactContext.packageName, 0).versionName
+        }.getOrNull() ?: ""
+        promise.resolve(v)
     }
 
     /** True until [completeFirstRun] is called — drives the first-launch setup. */
@@ -278,6 +297,7 @@ class YtdlModule(private val reactContext: ReactApplicationContext) :
     companion object {
         const val NAME = "GrabixYtdl"
         private const val KEY_SETUP_DONE = "setup_done"
+        private const val KEY_ENGINE_UPDATED = "engine_updated"
         private const val USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
                 "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"

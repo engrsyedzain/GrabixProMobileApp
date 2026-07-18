@@ -3,7 +3,9 @@ package com.grabixpromobileapp.download
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -236,11 +238,24 @@ class DownloadWorker(appContext: Context, params: WorkerParameters) :
         NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setContentTitle("Grabbing: $title")
             .setContentText("$percent%")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_grabix)
+            .setContentIntent(openAppIntent())
             .setOngoing(true)
             .setProgress(100, percent, percent <= 0)
             .setOnlyAlertOnce(true)
             .build()
+
+    /** Tapping the progress notification brings Grabix to the front. */
+    private fun openAppIntent(): PendingIntent {
+        val launch = applicationContext.packageManager
+            .getLaunchIntentForPackage(applicationContext.packageName)
+            ?.apply { addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP) }
+            ?: Intent()
+        return PendingIntent.getActivity(
+            applicationContext, 0, launch,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
 
     private fun ensureChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

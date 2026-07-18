@@ -30,11 +30,13 @@ import type {
 } from '../native/types';
 import {buildFormatOptions, FormatOption} from '../native/formats';
 import {useDownloads} from '../downloads';
+import {tick} from '../haptics';
 import {colors, formatBytes, formatDuration} from '../theme';
 import {Button, Card, Chip, Ring} from '../ui';
 import PlaylistPicker from './PlaylistPicker';
 import RangeSlider from '../components/RangeSlider';
 import TimeField from '../components/TimeField';
+import VideoCardSkeleton from '../components/Skeleton';
 
 export default function HomeScreen({onGoToLibrary}: {onGoToLibrary: () => void}) {
   const {active, start, cancel} = useDownloads();
@@ -86,8 +88,29 @@ export default function HomeScreen({onGoToLibrary}: {onGoToLibrary: () => void})
     return () => sub.remove();
   }, [checkClipboard]);
 
+  // Kick off a download from a freshly-fetched (not state) VideoInfo, so the
+  // auto-grab path can grab immediately after parsing without waiting on a
+  // re-render.
+  const startDownload = useCallback(
+    async (data: VideoInfo, selectorId: string, section?: string) => {
+      setError(null);
+      try {
+        const id = await start({
+          url: data.webpageUrl ?? data.url,
+          formatSelector: selectorId,
+          title: data.title,
+          section,
+        });
+        setMyJobId(id);
+      } catch (e: any) {
+        setError(e?.message ?? 'Could not start download.');
+      }
+    },
+    [start],
+  );
+
   const parse = useCallback(
-    async (target?: string) => {
+    async (target?: string, opts?: {autoDownload?: boolean}) => {
       const link = (target ?? url).trim();
       if (!link) return;
       setError(null);
@@ -96,22 +119,27 @@ export default function HomeScreen({onGoToLibrary}: {onGoToLibrary: () => void})
       setShowAllFormats(false);
       setParsing(true);
       try {
-        // If playlists are enabled and this looks like one, show the picker.
-        if (playlistEnabled && looksLikePlaylist(link)) {
+        // If playlists are enabled and this looks like one, show the picker —
+        // unless we're auto-grabbing, where we just take the single video.
+        if (!opts?.autoDownload && playlistEnabled && looksLikePlaylist(link)) {
           const pl = await Ytdl.getPlaylist(link);
           if (pl.isPlaylist && pl.entries.length > 1) {
             setPlaylist(pl);
             return;
           }
         }
-        setInfo(await Ytdl.getInfo(link));
+        const data = await Ytdl.getInfo(link);
+        setInfo(data);
+        if (opts?.autoDownload) {
+          startDownload(data, autoSelector(defaultQuality));
+        }
       } catch (e: any) {
         setError(e?.message ?? 'Could not read this video.');
       } finally {
         setParsing(false);
       }
     },
-    [url, playlistEnabled],
+    [url, playlistEnabled, startDownload, defaultQuality],
   );
 
   // Share-sheet entry: drain a pending URL on mount + listen while running.
@@ -138,26 +166,16 @@ export default function HomeScreen({onGoToLibrary}: {onGoToLibrary: () => void})
   }, [active, myJobId]);
 
   const grab = useCallback(
-    async (selectorId: string) => {
+    (selectorId: string) => {
       if (!info) return;
-      setError(null);
+      tick();
       const section =
         trimOn && trimEnd > trimStart
           ? `*${Math.round(trimStart)}-${Math.round(trimEnd)}`
           : undefined;
-      try {
-        const id = await start({
-          url: info.webpageUrl ?? info.url,
-          formatSelector: selectorId,
-          title: info.title,
-          section,
-        });
-        setMyJobId(id);
-      } catch (e: any) {
-        setError(e?.message ?? 'Could not start download.');
-      }
+      startDownload(info, selectorId, section);
     },
-    [info, start, trimOn, trimStart, trimEnd],
+    [info, startDownload, trimOn, trimStart, trimEnd],
   );
 
   const grabPlaylist = useCallback(
@@ -219,8 +237,11 @@ export default function HomeScreen({onGoToLibrary}: {onGoToLibrary: () => void})
         </View>
         <View style={{height: 12}} />
         <Button
-          title={parsing ? 'Reading…' : 'Get formats'}
-          onPress={() => parse()}
+          title={parsing ? 'Analyzing…' : 'Get formats'}
+          onPress={() => {
+            tick();
+            parse();
+          }}
           loading={parsing}
           disabled={!url.trim()}
           icon={
@@ -255,6 +276,8 @@ export default function HomeScreen({onGoToLibrary}: {onGoToLibrary: () => void})
           <Text style={{color: colors.danger, fontWeight: '600'}}>{error}</Text>
         </Card>
       )}
+
+      {parsing && !info && <VideoCardSkeleton />}
 
       {showEmpty && <EmptyState />}
 
@@ -499,6 +522,19 @@ function looksLikePlaylist(url: string): boolean {
     t.includes('/sets/') ||
     t.includes('/album/')
   );
+}
+
+/**
+ * yt-dlp selector used when auto-grab downloads without asking. Honours a fixed
+ * default quality if the user set one; otherwise falls back to 720p, per the
+ * feature's "defaults to 720p" behaviour.
+ */
+function autoSelector(q: DefaultQuality): string {
+  if (q !== 'ask') {
+    const g = quickGrab(q);
+    if (g) return g.id;
+  }
+  return 'bestvideo[height<=720]+bestaudio/best';
 }
 
 /** Maps a fixed default-quality setting to a yt-dlp selector + label. */

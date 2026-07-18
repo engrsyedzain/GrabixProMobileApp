@@ -11,6 +11,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Subtle haptic ticks confirming grab actions. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- Legacy storage for Android <= 9. On 10+ we download into app-specific
          storage (no permission) and publish via MediaStore. -->
     <uses-permission

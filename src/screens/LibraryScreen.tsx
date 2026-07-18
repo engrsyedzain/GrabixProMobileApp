@@ -179,13 +179,24 @@ export default function LibraryScreen() {
         ListHeaderComponent={header}
         ListEmptyComponent={
           !loading && active.length === 0 && failed.length === 0 ? (
-            <Card style={{marginTop: 12}}>
-              <Text style={{color: colors.textDim}}>
-                {query
-                  ? 'No downloads match your search.'
-                  : 'No downloads yet. Share a video to Grabix Pro or paste a link on the Grab tab — saved files land in Movies / Music → GrabixPro.'}
-              </Text>
-            </Card>
+            query ? (
+              <Card style={{marginTop: 12}}>
+                <Text style={{color: colors.textDim}}>
+                  No downloads match your search.
+                </Text>
+              </Card>
+            ) : (
+              <View style={styles.empty}>
+                <View style={styles.emptyIcon}>
+                  <Video size={28} color={colors.primary} />
+                </View>
+                <Text style={styles.emptyTitle}>No downloads yet</Text>
+                <Text style={styles.emptyBody}>
+                  Share a video to Grabix Pro or paste a link on the Grab tab.
+                  Saved files land in Movies / Music → GrabixPro.
+                </Text>
+              </View>
+            )
           ) : null
         }
         renderItem={({item}) => (
@@ -398,6 +409,27 @@ const styles = StyleSheet.create({
   h1: {color: colors.text, fontSize: 26, fontWeight: '800', marginTop: 20},
   sub: {color: colors.textDim, fontSize: 13, marginTop: 4},
   list: {paddingTop: 16, paddingBottom: 40},
+
+  empty: {alignItems: 'center', paddingTop: 60, paddingHorizontal: 20},
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.primaryDim,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {color: colors.text, fontSize: 17, fontWeight: '800'},
+  emptyBody: {
+    color: colors.textDim,
+    fontSize: 13,
+    marginTop: 8,
+    lineHeight: 19,
+    textAlign: 'center',
+  },
 
   activeTile: {
     flexDirection: 'row',

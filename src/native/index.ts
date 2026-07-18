@@ -45,6 +45,14 @@ export const Ytdl = {
   getVersion(): Promise<string | null> {
     return GrabixYtdl.getVersion();
   },
+  /** This app's own version name from the manifest (e.g. "1.0"). */
+  getAppVersion(): Promise<string> {
+    return GrabixYtdl?.getAppVersion?.() ?? Promise.resolve('');
+  },
+  /** True once a yt-dlp update has completed at least once. */
+  isEngineUpdated(): Promise<boolean> {
+    return GrabixYtdl?.isEngineUpdated?.() ?? Promise.resolve(true);
+  },
   /** Drain a URL delivered via the Share sheet before JS mounted. */
   getSharedUrl(): Promise<string | null> {
     return GrabixYtdl.getSharedUrl();

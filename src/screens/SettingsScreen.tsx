@@ -65,6 +65,7 @@ const openWhatsApp = () =>
 export default function SettingsScreen() {
   const [notifOk, setNotifOk] = useState(true);
   const [version, setVersion] = useState<string | null>(null);
+  const [appVersion, setAppVersion] = useState('');
   const [updating, setUpdating] = useState(false);
   const [settings, setSettingsState] = useState<AppSettings>({
     playlist: false,
@@ -82,6 +83,7 @@ export default function SettingsScreen() {
     }
     // versionName may be null until the first init/update completes.
     Ytdl.getVersion().then(setVersion).catch(() => setVersion(null));
+    Ytdl.getAppVersion().then(setAppVersion).catch(() => {});
     Ytdl.getSettings().then(setSettingsState).catch(() => {});
   }, []);
 
@@ -95,12 +97,25 @@ export default function SettingsScreen() {
   }, []);
 
   const requestNotif = async () => {
-    if (Number(Platform.Version) >= 33) {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
-      refresh();
+    // Below Android 13 notifications are granted at install; if they still show
+    // as off (e.g. the user or the OS disabled them), open App info to fix it.
+    if (Number(Platform.Version) < 33) {
+      Linking.openSettings().catch(() => {});
+      return;
     }
+    const res = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+    // If the system won't show the dialog anymore (denied / "don't ask again",
+    // common for sideloaded apps on some skins), guide them to App info.
+    if (res !== PermissionsAndroid.RESULTS.GRANTED) {
+      ToastAndroid.show(
+        'Turn on notifications for Grabix Pro in App info → Notifications.',
+        ToastAndroid.LONG,
+      );
+      Linking.openSettings().catch(() => {});
+    }
+    refresh();
   };
 
   const runUpdate = async (channel: UpdateChannel) => {
@@ -278,7 +293,9 @@ export default function SettingsScreen() {
           </View>
           <View style={{flex: 1, marginLeft: 14}}>
             <Text style={styles.rowLabel}>Grabix Pro</Text>
-            <Text style={styles.rowDesc}>Version 1.0.0</Text>
+            <Text style={styles.rowDesc}>
+              {appVersion ? `Version ${appVersion}` : 'Version…'}
+            </Text>
           </View>
         </View>
 
