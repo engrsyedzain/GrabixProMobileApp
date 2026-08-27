@@ -1,8 +1,8 @@
 // Official download links (provided).
 export const WINDOWS_URL =
-  'https://archive.org/download/grabix-pro-0.1.1-x-64-setup/GrabixPro_0.2.0.0_x64_setup.exe';
+  'https://github.com/engrsyedzain/downloads/releases/download/untagged-429dc1986248e1312c7a/GrabixPro_0.2.0.0_x64_setup.exe';
 export const ANDROID_URL =
-  'https://archive.org/download/grabix-pro-arm-64-v-8a/app-arm64-v8a-release.apk';
+  'https://github.com/engrsyedzain/downloads/releases/download/untagged-429dc1986248e1312c7a/grabix-pro-arm64-v8a-release.apk';
 
 // Public source repositories — Grabix Pro is fully open-source.
 export const GITHUB_MOBILE_URL =
