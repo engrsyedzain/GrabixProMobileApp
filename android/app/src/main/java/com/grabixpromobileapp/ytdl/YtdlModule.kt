@@ -217,6 +217,51 @@ class YtdlModule(private val reactContext: ReactApplicationContext) :
         }
     }.getOrNull()
 
+    /** True when FFmpeg's shared libraries are already on this device. */
+    @ReactMethod
+    fun isFfmpegInstalled(promise: Promise) {
+        promise.resolve(FfmpegProvisioner.isInstalled(reactContext))
+    }
+
+    /**
+     * Fetch FFmpeg's shared libraries if they are not here yet.
+     *
+     * Resolves { installed, downloaded } - `downloaded` false means there was
+     * nothing to do, which is every launch after the first. Emits
+     * GrabixFfmpegProgress while it works.
+     */
+    @ReactMethod
+    fun ensureFfmpeg(promise: Promise) {
+        executor.execute {
+            try {
+                if (FfmpegProvisioner.isInstalled(reactContext)) {
+                    promise.resolve(result(installed = true, downloaded = false))
+                    return@execute
+                }
+
+                FfmpegProvisioner.install(reactContext) { read, total ->
+                    sendEvent(
+                        GrabixEvents.FFMPEG_PROGRESS,
+                        Arguments.createMap().apply {
+                            putDouble("progress", if (total > 0) read.toDouble() / total else 0.0)
+                            putDouble("bytes", read.toDouble())
+                            putDouble("total", total.toDouble())
+                        },
+                    )
+                }
+                promise.resolve(result(installed = true, downloaded = true))
+            } catch (t: Throwable) {
+                promise.reject("E_FFMPEG_FAILED", t.message ?: "Could not set up FFmpeg", t)
+            }
+        }
+    }
+
+    private fun result(installed: Boolean, downloaded: Boolean): WritableMap =
+        Arguments.createMap().apply {
+            putBoolean("installed", installed)
+            putBoolean("downloaded", downloaded)
+        }
+
     /** True once a yt-dlp update has completed at least once (else retry on launch). */
     @ReactMethod
     fun isEngineUpdated(promise: Promise) {

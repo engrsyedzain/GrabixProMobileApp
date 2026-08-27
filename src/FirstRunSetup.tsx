@@ -9,8 +9,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {Bell, Check, RefreshCw, TriangleAlert, Zap} from 'lucide-react-native';
-import { Ytdl } from './native';
+import {Bell, Check, Film, RefreshCw, TriangleAlert, Zap} from 'lucide-react-native';
+import { Ytdl, onFfmpegProgress } from './native';
 import { colors } from './theme';
 import { Button } from './ui';
 
@@ -18,8 +18,10 @@ type StepState = 'pending' | 'running' | 'done' | 'failed';
 
 /**
  * Runs once, on the very first launch:
- *   1. asks for notification permission (so download progress can be shown), and
- *   2. updates the bundled yt-dlp engine to the latest stable release.
+ *   1. asks for notification permission (so download progress can be shown),
+ *   2. updates the yt-dlp engine to the latest stable release, and
+ *   3. fetches FFmpeg's shared libraries, which are downloaded rather than
+ *      shipped so the APK stays roughly half the size.
  *
  * Both steps are best-effort — if either fails we still mark setup complete so
  * the user isn't nagged on every launch, and point them at Settings to retry.
@@ -28,6 +30,8 @@ export default function FirstRunSetup() {
   const [visible, setVisible] = useState(false);
   const [notif, setNotif] = useState<StepState>('pending');
   const [update, setUpdate] = useState<StepState>('pending');
+  const [media, setMedia] = useState<StepState>('pending');
+  const [mediaPct, setMediaPct] = useState(0);
   const [version, setVersion] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
 
@@ -61,8 +65,26 @@ export default function FirstRunSetup() {
     }
 
     await updating;
+
+    // FFmpeg's shared libraries, ~35 MB, fetched rather than shipped in the APK.
+    // Sequential rather than alongside the engine update on purpose: two large
+    // downloads over one phone connection finish no sooner together, and this
+    // way each step's progress means something.
+    setMedia('running');
+    try {
+      await Ytdl.ensureFfmpeg();
+      setMedia('done');
+    } catch {
+      setMedia('failed');
+    }
+
     await Ytdl.completeFirstRun().catch(() => {});
     setFinished(true);
+  }, []);
+
+  useEffect(() => {
+    const sub = onFfmpegProgress(e => setMediaPct(Math.round(e.progress * 100)));
+    return () => sub.remove();
   }, []);
 
   useEffect(() => {
@@ -104,6 +126,19 @@ export default function FirstRunSetup() {
             title="Notifications"
             body="So we can show download progress."
             failBody="Not allowed. You can enable it later in Settings."
+          />
+          <Step
+            state={media}
+            icon={<Film size={20} color={colors.primary} />}
+            title="Media toolkit"
+            body={
+              media === 'running'
+                ? `Downloading FFmpeg${mediaPct ? ` - ${mediaPct}%` : ''}. One time only.`
+                : media === 'done'
+                ? 'FFmpeg is ready.'
+                : 'FFmpeg merges video and audio into one file.'
+            }
+            failBody="Couldn't fetch FFmpeg. Retry from Settings when you're online."
           />
           <Step
             state={update}

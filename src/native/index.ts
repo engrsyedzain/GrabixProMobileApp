@@ -10,6 +10,8 @@ import type {
   UpdateChannel,
   UpdateResult,
   UpdateCheck,
+  FfmpegSetup,
+  FfmpegProgressEvent,
   AppSettings,
   PlaylistInfo,
 } from './types';
@@ -60,6 +62,17 @@ export const Ytdl = {
   /** True once a yt-dlp update has completed at least once. */
   isEngineUpdated(): Promise<boolean> {
     return GrabixYtdl?.isEngineUpdated?.() ?? Promise.resolve(true);
+  },
+  /** True when FFmpeg's shared libraries are already on the device. */
+  isFfmpegInstalled(): Promise<boolean> {
+    return GrabixYtdl?.isFfmpegInstalled?.() ?? Promise.resolve(true);
+  },
+  /** Fetch FFmpeg's shared libraries if missing; emits GrabixFfmpegProgress. */
+  ensureFfmpeg(): Promise<FfmpegSetup> {
+    return (
+      GrabixYtdl?.ensureFfmpeg?.() ??
+      Promise.resolve({installed: true, downloaded: false})
+    );
   },
   /** Drain a URL delivered via the Share sheet before JS mounted. */
   getSharedUrl(): Promise<string | null> {
@@ -121,6 +134,7 @@ export const GrabixEvent = {
   DownloadProgress: 'GrabixDownloadProgress',
   DownloadComplete: 'GrabixDownloadComplete',
   DownloadError: 'GrabixDownloadError',
+  FfmpegProgress: 'GrabixFfmpegProgress',
 } as const;
 
 export function onShareReceived(
@@ -142,6 +156,11 @@ export function onDownloadError(
   cb: (e: DownloadErrorEvent) => void,
 ): EmitterSubscription {
   return DeviceEventEmitter.addListener(GrabixEvent.DownloadError, cb);
+}
+export function onFfmpegProgress(
+  cb: (e: FfmpegProgressEvent) => void,
+): EmitterSubscription {
+  return DeviceEventEmitter.addListener(GrabixEvent.FfmpegProgress, cb);
 }
 
 export * from './types';

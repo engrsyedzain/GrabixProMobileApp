@@ -31,4 +31,5 @@ object GrabixEvents {
     const val DOWNLOAD_PROGRESS = "GrabixDownloadProgress"
     const val DOWNLOAD_COMPLETE = "GrabixDownloadComplete"
     const val DOWNLOAD_ERROR = "GrabixDownloadError"
+    const val FFMPEG_PROGRESS = "GrabixFfmpegProgress"
 }

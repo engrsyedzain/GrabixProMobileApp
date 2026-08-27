@@ -17,6 +17,7 @@ import com.facebook.react.bridge.WritableMap
 import com.grabixpromobileapp.R
 import com.grabixpromobileapp.bridge.GrabixEvents
 import com.grabixpromobileapp.bridge.PrefKeys
+import com.grabixpromobileapp.ytdl.FfmpegProvisioner
 import com.grabixpromobileapp.ytdl.Ytdl
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
@@ -58,6 +59,15 @@ class DownloadWorker(appContext: Context, params: WorkerParameters) :
             .apply { mkdirs() }
         try {
             Ytdl.ensureInit(applicationContext)
+
+            // FFmpeg's libraries are downloaded, not bundled, so on a first run
+            // they can still be arriving. Say so plainly: without them a merge
+            // fails deep inside yt-dlp with something nobody can act on.
+            if (!FfmpegProvisioner.isInstalled(applicationContext)) {
+                emitError("FFmpeg is still being set up. Open Grabix Pro and wait for setup to finish.")
+                return@withContext Result.failure()
+            }
+
             emitProgress(0.0, "preparing")
 
             val prefs = applicationContext

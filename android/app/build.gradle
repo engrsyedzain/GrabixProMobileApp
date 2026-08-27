@@ -108,6 +108,14 @@ android {
     packagingOptions {
         jniLibs {
             useLegacyPackaging = true
+
+            // FFmpeg's shared libraries, ~34 MB per ABI and half the APK. The
+            // ffmpeg/ffprobe executables beside it (libffmpeg.so, libffprobe.so)
+            // stay - YoutubeDL resolves them out of nativeLibraryDir, which is
+            // the one place Android reliably allows execution from. Only this
+            // payload is dropped, and FfmpegProvisioner fetches it on first run
+            // into the same directory FFmpeg.init() would have unpacked it to.
+            excludes += ["**/libffmpeg.zip.so"]
         }
     }
     signingConfigs {
@@ -134,13 +142,21 @@ android {
 
 // Give each ABI split a distinct versionCode so devices update correctly (and
 // Play would accept them). Convention: higher codes for newer/64-bit ABIs.
-def abiVersionCodes = ["armeabi-v7a": 1, "arm64-v8a": 2]
+def abiVersionCodes = ["armeabi-v7a": 1, "arm64-v8a": 2, "x86": 3, "x86_64": 4]
 android.applicationVariants.all { variant ->
     variant.outputs.each { output ->
         def abi = output.getFilter(com.android.build.OutputFile.ABI)
         if (abi != null) {
-            output.versionCodeOverride =
-                abiVersionCodes.get(abi) * 1000 + variant.versionCode
+            // Default rather than index blindly: an ABI added to the splits above
+            // but missed here used to null-deref, and Gradle reports that as
+            // "Failed to apply plugin com.facebook.react.rootproject" - a message
+            // that says nothing about the actual cause.
+            def code = abiVersionCodes.get(abi)
+            if (code == null) {
+                logger.warn("No versionCode offset for ABI ${abi}; defaulting to 9.")
+                code = 9
+            }
+            output.versionCodeOverride = code * 1000 + variant.versionCode
         }
     }
 }
@@ -155,6 +171,10 @@ dependencies {
     // Facebook (and hundreds more) with in-app updatable extractor rules.
     implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
     implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
+    // Used directly by FfmpegProvisioner for ZipUtils.unzip, which restores the
+    // symlinks in FFmpeg's lib tree. Transitive via :library, but declared
+    // because we call into it.
+    implementation("io.github.junkfood02.youtubedl-android:common:0.18.1")
 
     // Durable background downloads that survive the app being killed.
     implementation("androidx.work:work-runtime-ktx:2.9.1")

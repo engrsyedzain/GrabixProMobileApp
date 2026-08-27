@@ -107,6 +107,20 @@ export interface UpdateResult {
   version: string | null;
 }
 
+export interface FfmpegSetup {
+  /** True once the shared libraries are on the device. */
+  installed: boolean;
+  /** False when there was nothing to do, i.e. every launch after the first. */
+  downloaded: boolean;
+}
+
+export interface FfmpegProgressEvent {
+  /** 0..1 through the download. */
+  progress: number;
+  bytes: number;
+  total: number;
+}
+
 export interface UpdateCheck {
   /** Engine version on the device, or null before the first init/update. */
   current: string | null;

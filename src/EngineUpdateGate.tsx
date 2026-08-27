@@ -29,6 +29,21 @@ export default function EngineUpdateGate() {
   const run = useCallback(async () => {
     if (await Ytdl.isFirstRun().catch(() => false)) return;
 
+    // Someone upgrading from a build that still carried FFmpeg in the APK has
+    // never run first-run setup, so the libraries are simply absent. Fetch them
+    // before anything else - without them nothing merges.
+    if (!(await Ytdl.isFfmpegInstalled().catch(() => true))) {
+      setTarget(null);
+      setPhase('updating');
+      try {
+        await Ytdl.ensureFfmpeg();
+      } catch {
+        setPhase('failed');
+        return;
+      }
+      setPhase('idle');
+    }
+
     const check = await Ytdl.checkForUpdate().catch(() => null);
     if (!check?.updateAvailable) return;
 

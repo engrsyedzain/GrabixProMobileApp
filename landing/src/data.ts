@@ -1,8 +1,8 @@
 // Official download links (provided).
 export const WINDOWS_URL =
-  'https://archive.org/download/grabix-pro-0.1.1-x-64-setup/GrabixPro_0.1.1_x64-setup.exe';
+  'https://archive.org/download/grabix-pro-0.1.1-x-64-setup/GrabixPro_0.2.0.0_x64_setup.exe';
 export const ANDROID_URL =
-  'https://archive.org/download/grabix-pro-arm-64-v-8a/GrabixPro-arm64-v8a.apk';
+  'https://archive.org/download/grabix-pro-arm-64-v-8a/app-arm64-v8a-release.apk';
 
 // Public source repositories — Grabix Pro is fully open-source.
 export const GITHUB_MOBILE_URL =
@@ -16,7 +16,10 @@ export const WEBSITE_LABEL = 'syed-zain.com';
 export const CONTACT_EMAIL = 'me@syed-zain.com';
 export const CONTACT_WHATSAPP = '+92 300 2652848';
 // wa.me expects digits only — no '+', spaces or dashes.
-export const WHATSAPP_URL = `https://wa.me/${CONTACT_WHATSAPP.replace(/\D/g, '')}`;
+export const WHATSAPP_URL = `https://wa.me/${CONTACT_WHATSAPP.replace(
+  /\D/g,
+  '',
+)}`;
 export const MAILTO_URL = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
   'Grabix Pro — Support',
 )}`;
