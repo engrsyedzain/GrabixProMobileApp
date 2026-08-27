@@ -66,19 +66,14 @@ export default function FirstRunSetup() {
   }, []);
 
   useEffect(() => {
+    // Later launches are EngineUpdateGate's job, including the case where this
+    // screen couldn't finish its engine update (no network on first launch):
+    // the gate sees no installed version, finds one on GitHub and installs it.
     Ytdl.isFirstRun()
       .then(first => {
         if (first) {
           setVisible(true);
           run();
-        } else {
-          // Safety-net: if a previous first run couldn't finish the engine
-          // update (e.g. no network on first launch), quietly retry now.
-          Ytdl.isEngineUpdated()
-            .then(ok => {
-              if (!ok) Ytdl.update('STABLE').catch(() => {});
-            })
-            .catch(() => {});
         }
       })
       .catch(() => {});

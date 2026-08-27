@@ -17,6 +17,7 @@ import {
   Check,
   Info,
   ListVideo,
+  Globe,
   Mail,
   MessageCircle,
   RefreshCw,
@@ -39,8 +40,9 @@ const QUALITY_OPTIONS: {value: DefaultQuality; label: string}[] = [
   {value: 'mp3', label: 'MP3'},
 ];
 
-const CONTACT_EMAIL = 'engr.syedzain@gmail.com';
+const CONTACT_EMAIL = 'me@syed-zain.com';
 const CONTACT_WHATSAPP = '+92 300 2652848';
+const WEBSITE_URL = 'https://syed-zain.com';
 // wa.me needs digits only — no '+', spaces or dashes.
 const WHATSAPP_URL = `https://wa.me/${CONTACT_WHATSAPP.replace(/\D/g, '')}`;
 const MAILTO_URL = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
@@ -61,6 +63,9 @@ const openEmail = () =>
 
 const openWhatsApp = () =>
   openExternal(WHATSAPP_URL, `WhatsApp not installed. Message ${CONTACT_WHATSAPP}`);
+
+const openWebsite = () =>
+  openExternal(WEBSITE_URL, `No browser found. Visit ${WEBSITE_URL}`);
 
 export default function SettingsScreen() {
   const [notifOk, setNotifOk] = useState(true);
@@ -283,6 +288,21 @@ export default function SettingsScreen() {
             <Text style={styles.rowDesc}>{CONTACT_WHATSAPP}</Text>
           </View>
         </Pressable>
+
+        <View style={styles.divider} />
+
+        <Pressable
+          style={styles.row}
+          android_ripple={{color: colors.surfaceAlt}}
+          onPress={openWebsite}>
+          <View style={styles.iconTile}>
+            <Globe size={20} color={colors.primary} />
+          </View>
+          <View style={{flex: 1, marginLeft: 14}}>
+            <Text style={styles.rowLabel}>Website</Text>
+            <Text style={styles.rowDesc}>syed-zain.com</Text>
+          </View>
+        </Pressable>
       </Card>
 
       <Text style={styles.section}>About</Text>
@@ -303,8 +323,8 @@ export default function SettingsScreen() {
 
         <View style={styles.devBlock}>
           <Text style={styles.devLabel}>Developed by</Text>
-          <Text style={styles.devName}>ZAIN</Text>
-          <Text style={styles.devCopy}>© 2025 · All rights reserved</Text>
+          <Text style={styles.devName}>SYED ZAIN</Text>
+          <Text style={styles.devCopy}>syed-zain.com · © 2025 All rights reserved</Text>
         </View>
       </Card>
 

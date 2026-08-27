@@ -16,6 +16,8 @@ import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import com.yausername.youtubedl_android.mapper.VideoFormat
 import com.yausername.youtubedl_android.mapper.VideoInfo
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.concurrent.Executors
 
 /**
@@ -158,6 +160,63 @@ class YtdlModule(private val reactContext: ReactApplicationContext) :
         }
     }
 
+    /**
+     * Is a newer yt-dlp available? Answers { current, latest, updateAvailable }.
+     *
+     * Deliberately separate from [update]: running the updater on every launch
+     * just to learn there was nothing to do would put a multi-megabyte engine
+     * download in front of a user who only wanted to open the app. This is one
+     * small JSON request, so the launch check is cheap and the app only blocks
+     * the interface when there is genuinely something to install.
+     *
+     * Never rejects. Being offline at launch is an ordinary state, not an error
+     * worth interrupting anyone over - it simply reports "no update".
+     */
+    @ReactMethod
+    fun checkForUpdate(promise: Promise) {
+        executor.execute {
+            val current = runCatching {
+                Ytdl.ensureInit(reactContext)
+                safe { YoutubeDL.getInstance().versionName(reactContext) }
+            }.getOrNull()
+
+            val latest = fetchLatestTag()
+            // yt-dlp tags releases as YYYY.MM.DD, so a plain string compare
+            // orders them correctly. Strictly newer only: a user who moved to a
+            // nightly must not be pulled back to stable on the next launch.
+            val available = latest != null && (current == null || latest > current)
+
+            promise.resolve(
+                Arguments.createMap().apply {
+                    putString("current", current)
+                    putString("latest", latest)
+                    putBoolean("updateAvailable", available)
+                },
+            )
+        }
+    }
+
+    /** Newest stable yt-dlp tag on GitHub, or null if it can't be reached. */
+    private fun fetchLatestTag(): String? = runCatching {
+        val conn = URL(LATEST_RELEASE_API).openConnection() as HttpURLConnection
+        try {
+            conn.requestMethod = "GET"
+            // GitHub rejects API requests that send no User-Agent.
+            conn.setRequestProperty("User-Agent", "GrabixPro")
+            conn.setRequestProperty("Accept", "application/vnd.github+json")
+            // Short timeouts on purpose: this sits in front of the app's first
+            // paint, so a stalled connection must fail fast rather than hold the
+            // splash open.
+            conn.connectTimeout = 5000
+            conn.readTimeout = 8000
+            if (conn.responseCode !in 200..299) return@runCatching null
+            val body = conn.inputStream.bufferedReader().use { it.readText() }
+            org.json.JSONObject(body).optString("tag_name").trim().ifBlank { null }
+        } finally {
+            conn.disconnect()
+        }
+    }.getOrNull()
+
     /** True once a yt-dlp update has completed at least once (else retry on launch). */
     @ReactMethod
     fun isEngineUpdated(promise: Promise) {
@@ -297,6 +356,8 @@ class YtdlModule(private val reactContext: ReactApplicationContext) :
     companion object {
         const val NAME = "GrabixYtdl"
         private const val KEY_SETUP_DONE = "setup_done"
+        private const val LATEST_RELEASE_API =
+            "https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest"
         private const val KEY_ENGINE_UPDATED = "engine_updated"
         private const val USER_AGENT =
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +

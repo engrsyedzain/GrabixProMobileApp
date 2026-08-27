@@ -82,8 +82,8 @@ android {
         applicationId "com.grabixpromobileapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
     }
 
     // Generate a separate APK per ABI. youtubedl-android bundles a full Python +

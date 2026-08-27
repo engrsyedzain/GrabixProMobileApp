@@ -11,7 +11,9 @@ export const GITHUB_DESKTOP_URL =
   'https://github.com/engrsyedzain/Grabix-Pro-Desktop';
 
 // Developer contact.
-export const CONTACT_EMAIL = 'engr.syedzain@gmail.com';
+export const WEBSITE_URL = 'https://syed-zain.com';
+export const WEBSITE_LABEL = 'syed-zain.com';
+export const CONTACT_EMAIL = 'me@syed-zain.com';
 export const CONTACT_WHATSAPP = '+92 300 2652848';
 // wa.me expects digits only — no '+', spaces or dashes.
 export const WHATSAPP_URL = `https://wa.me/${CONTACT_WHATSAPP.replace(/\D/g, '')}`;

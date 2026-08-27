@@ -1,4 +1,4 @@
-import {Monitor, Smartphone, Mail, MessageCircle} from 'lucide-react';
+import {Monitor, Smartphone, Mail, MessageCircle, Globe} from 'lucide-react';
 import Logo from '../components/Logo';
 import {
   WINDOWS_URL,
@@ -7,6 +7,8 @@ import {
   CONTACT_WHATSAPP,
   MAILTO_URL,
   WHATSAPP_URL,
+  WEBSITE_URL,
+  WEBSITE_LABEL,
 } from '../data';
 
 export default function Footer() {
@@ -82,6 +84,17 @@ export default function Footer() {
                   />
                   {CONTACT_WHATSAPP}
                 </a>
+                <a
+                  href={WEBSITE_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex items-center gap-2.5 text-sm text-mist transition-colors hover:text-blue md:justify-end">
+                  <Globe
+                    size={16}
+                    className="text-blue transition-transform group-hover:scale-110"
+                  />
+                  {WEBSITE_LABEL}
+                </a>
               </div>
             </div>
           </div>
@@ -90,7 +103,14 @@ export default function Footer() {
         <div className="mt-12 flex flex-col gap-4 border-t border-line/60 pt-6 text-xs text-haze sm:flex-row sm:items-center sm:justify-between">
           <p>
             © 2025 Grabix Pro. Crafted by{' '}
-            <span className="font-bold text-mist">ZAIN</span>. All rights reserved.
+            <a
+              href={WEBSITE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-mist transition-colors hover:text-blue">
+              Syed Zain
+            </a>
+            . All rights reserved.
           </p>
           <p className="max-w-md sm:text-right">
             Please download only content you own or have permission to save, and

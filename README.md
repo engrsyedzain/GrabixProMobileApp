@@ -6,7 +6,7 @@ A fast, private media downloader for **Android** and **Windows**. Paste a link �
 
 Grabix Pro saves video and audio from YouTube, TikTok, Instagram, Facebook, X, Vimeo, Twitch, Dailymotion, Bilibili and hundreds of other sites — as MP4, MP3 or M4A. No account, no watermark, no trial wall.
 
-**It is fully offline by design.** There is no backend, no analytics and no telemetry. The only network traffic is to the video platform you are downloading from, and to GitHub when you choose to update the download engine.
+**It is fully offline by design.** There is no backend, no analytics and no telemetry. The only network traffic is to the video platform you are downloading from, and to GitHub to keep the download engine current.
 
 ---
 
@@ -40,7 +40,7 @@ The Android build is **sideloaded**, not distributed through Google Play, so And
 - **Built-in player** — play anything you have grabbed without leaving the app.
 - **Library** — search, sort, retry failed downloads, cancel running ones, share or delete files.
 - **Subtitles** — optional; de-duplicated to a single English track and embedded in the file.
-- **Self-updating engine** — update yt-dlp from inside the app, so extractor fixes arrive without a new APK.
+- **Self-updating engine** — the latest yt-dlp is fetched on first launch, and every launch after that checks GitHub for a newer one. When there is one the app holds a status screen while it installs, so extractor fixes arrive without a new APK and without a download failing first.
 
 ### Windows desktop app
 
@@ -52,7 +52,7 @@ The Android build is **sideloaded**, not distributed through Google Play, so And
 - **History** — search, sort, retry, cancel, and open a file's folder.
 - **System tray** — closing the window keeps downloads running; the tray shows live progress.
 - **Light and dark themes.**
-- **In-app engine updater.**
+- **Automatic engine updates, plus a manual updater in Settings.**
 
 ### Browser extension
 
@@ -132,7 +132,7 @@ npm run build    # production build → landing/dist/
 
 - No account, no sign-in, no tracking, no analytics, no telemetry, no ads.
 - Nothing you download, paste or search is sent anywhere.
-- Network traffic goes only to (1) the video platform you are downloading from and (2) GitHub, when *you* trigger an engine update.
+- Network traffic goes only to (1) the video platform you are downloading from and (2) GitHub, to check for and fetch engine updates.
 - The optional "browser cookies" feature on Windows reads your local browser session so private videos can be fetched. Those cookies are handed to yt-dlp on your own machine and are never transmitted anywhere else.
 
 ---
@@ -161,7 +161,7 @@ Grabix Pro is **not affiliated with, endorsed by, or sponsored by** yt-dlp, FFmp
 
 ### Engine updates
 
-The in-app updater fetches yt-dlp releases directly from the official [yt-dlp GitHub repository](https://github.com/yt-dlp/yt-dlp/releases). Those builds are supplied by the yt-dlp project under its own terms; Grabix Pro does not modify them.
+The launch check and the in-app updater both fetch yt-dlp releases directly from the official [yt-dlp GitHub repository](https://github.com/yt-dlp/yt-dlp/releases). Those builds are supplied by the yt-dlp project under its own terms; Grabix Pro does not modify them.
 
 ---
 
@@ -191,7 +191,8 @@ The Android app links against **youtubedl-android**, which is licensed under the
 
 Questions, bug reports and feature requests are welcome.
 
-- **Email:** [engr.syedzain@gmail.com](mailto:engr.syedzain@gmail.com)
+- **Email:** [me@syed-zain.com](mailto:me@syed-zain.com)
 - **WhatsApp:** [+92 300 2652848](https://wa.me/923002652848)
+- **Website:** [syed-zain.com](https://syed-zain.com)
 
-Built by **ZAIN**.
+Built by **Syed Zain**.

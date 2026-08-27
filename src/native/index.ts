@@ -9,6 +9,7 @@ import type {
   ShareReceivedEvent,
   UpdateChannel,
   UpdateResult,
+  UpdateCheck,
   AppSettings,
   PlaylistInfo,
 } from './types';
@@ -35,6 +36,13 @@ export const Ytdl = {
   getPlaylist(url: string): Promise<PlaylistInfo> {
     assertLinked();
     return GrabixYtdl.getPlaylist(url);
+  },
+  /** Is a newer yt-dlp out? One small request; never rejects (offline = no update). */
+  checkForUpdate(): Promise<UpdateCheck> {
+    return (
+      GrabixYtdl?.checkForUpdate?.() ??
+      Promise.resolve({current: null, latest: null, updateAvailable: false})
+    );
   },
   /** Download the latest yt-dlp for a channel; resolves with status + version. */
   update(channel: UpdateChannel = 'STABLE'): Promise<UpdateResult> {

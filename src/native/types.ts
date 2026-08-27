@@ -1,5 +1,5 @@
 // Shapes mirror the WritableMaps produced by the Kotlin native modules
-// (YtdlModule / DownloadService). Keep in sync.
+// (YtdlModule / DownloadWorker). Keep in sync.
 
 export interface VideoFormat {
   formatId: string | null;
@@ -44,7 +44,7 @@ export interface DownloadRequest {
   id?: string;
   url: string; // video page URL
   // yt-dlp selector/keyword from buildFormatOptions: "mp3" | "aac_audio" |
-  // "bestvideo[height<=H]+bestaudio/best". DownloadService maps it to a command.
+  // "bestvideo[height<=H]+bestaudio/best". DownloadWorker maps it to a command.
   formatSelector: string;
   title?: string;
   // Optional trim, as a yt-dlp --download-sections value, e.g. "*00:30-01:45".
@@ -105,4 +105,12 @@ export type UpdateChannel = 'STABLE' | 'NIGHTLY' | 'MASTER';
 export interface UpdateResult {
   status: string; // "DONE" | "ALREADY_UP_TO_DATE" | "UNKNOWN"
   version: string | null;
+}
+
+export interface UpdateCheck {
+  /** Engine version on the device, or null before the first init/update. */
+  current: string | null;
+  /** Newest stable tag on GitHub, or null when it couldn't be reached. */
+  latest: string | null;
+  updateAvailable: boolean;
 }

@@ -11,6 +11,7 @@ import LibraryScreen from './src/screens/LibraryScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import {DownloadsProvider, useDownloads} from './src/downloads';
 import FirstRunSetup from './src/FirstRunSetup';
+import EngineUpdateGate from './src/EngineUpdateGate';
 import Snackbar from './src/components/Snackbar';
 import {Logo} from './src/ui';
 import {colors} from './src/theme';
@@ -80,6 +81,9 @@ export default function App() {
       <DownloadsProvider>
         <Shell />
         <FirstRunSetup />
+        {/* Last, so its status screen covers the first-run one on the rare
+            launch where both would be up. */}
+        <EngineUpdateGate />
       </DownloadsProvider>
     </SafeAreaProvider>
   );
